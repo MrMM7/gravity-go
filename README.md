@@ -1,6 +1,6 @@
 # Gravity-Go
 
-**v0.5**
+**v0.6**
 
 A Go implementation of Gravity, my URL shortener project. This is my first project written in Go, built as a hands-on opportunity to learn the language and explore its ecosystem while recreating an existing project.
 ## Tech Stack
@@ -8,6 +8,8 @@ A Go implementation of Gravity, my URL shortener project. This is my first proje
 - **Go** — Core application
 - **Gin** — HTTP framework
 - **SQLite** — Database
+- **JWT** — Authentication
+- **Argon2id** — Secure password hashing
 
 ## Current Status
 
@@ -30,6 +32,5 @@ I recommend using [Bruno](https://usebruno.com). It's free and open-source, and 
 ## Project Goals
 
 - Add a front-end (This will be done by AI I will take care of the backend)
-- Authentication
 - Rate Limiting
 - ...

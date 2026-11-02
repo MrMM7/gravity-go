@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -29,11 +28,16 @@ func Init() error {
 	CREATE TABLE IF NOT EXISTS urls (
 	    short_code TEXT NOT NULL UNIQUE	PRIMARY KEY,
 	    original_url TEXT NOT NULL
+	);
+	
+	CREATE TABLE IF NOT EXISTS users (
+	    email TEXT NOT NULL UNIQUE,
+	    password TEXT NOT NULL
 	)
 `
 	_, err = DB.Exec(startingQuery)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	return nil
 }
