@@ -7,23 +7,58 @@ import (
 	"errors"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/argon2"
 )
 
+func getSecret() ([]byte, error) {
+	s := os.Getenv("JWT_SECURE_KEY")
+	if s == "" {
+		return nil, errors.New("JWT_SECURE_KEY is empty")
+	}
+	return []byte(s), nil
+}
+
 func CreateJWTToken(email string) (string, error) {
-	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"email": email})
-	key := []byte(os.Getenv("JWT_SECURE_KEY"))
-	if len(key) == 0 {
+	secret, err := getSecret()
+	if err != nil {
+		return "", err
+	}
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": email,
+		"exp":   jwt.NewNumericDate(time.Now().Add(7 * 26 * time.Hour)),
+	})
+	if len(secret) == 0 {
 		return "", errors.New("JWT_SECURE_KEY is empty")
 	}
-	s, err := t.SignedString(key)
+	s, err := t.SignedString(secret)
 
 	if err != nil {
 		return "", err
 	}
 	return s, nil
+}
+
+func ValidateJWTToken(tokenString string) (bool, error) {
+	secret, err := getSecret()
+	if err != nil {
+		return false, err
+	}
+	token, err := jwt.Parse(
+		tokenString,
+		func(t *jwt.Token) (any, error) {
+			return secret, nil
+		},
+		jwt.WithValidMethods([]string{"HS256"}),
+		jwt.WithExpirationRequired(),
+	)
+	if err != nil {
+		return false, err
+	}
+
+	return token.Valid, nil
 }
 
 func HashPassword(password string) (string, error) {
