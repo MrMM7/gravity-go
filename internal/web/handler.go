@@ -2,6 +2,7 @@ package web
 
 import (
 	"embed"
+	"gravity-go/internal/middlewares"
 	"io/fs"
 	"net/http"
 
@@ -36,7 +37,7 @@ func RegisterRoutes(r *gin.Engine) {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", authHTML)
 	}
 
-	r.GET("/", serveIndex)
+	r.GET("/", middlewares.TokenValidationMiddleware, serveIndex)
 	r.HEAD("/", serveIndex)
 
 	r.GET("/auth", serveAuth)
