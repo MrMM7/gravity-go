@@ -41,7 +41,7 @@ func SignupHandler(c *gin.Context) {
 	}
 
 	c.SetCookie("token", token, 3600, "/", "", false, true)
-	c.Redirect(http.StatusFound, "/")
+	c.JSON(http.StatusOK, gin.H{"message": "User created successfully"})
 }
 
 func SigninHandler(c *gin.Context) {
@@ -72,5 +72,5 @@ func SigninHandler(c *gin.Context) {
 	}
 
 	c.SetCookie("token", token, 3600, "/", "", false, true)
-	c.Redirect(http.StatusFound, "/")
+	c.JSON(http.StatusOK, gin.H{"message": "User entered successfully"})
 }
