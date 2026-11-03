@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"gravity-go/internal/auth"
 	"gravity-go/internal/database"
 	"gravity-go/internal/models"
 	"gravity-go/internal/routes"
@@ -54,13 +55,27 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 func TestFrontendAndStaticRoutes(t *testing.T) {
 	r := setupTestRouter(t)
 
-	// 1. Root route serves HTML frontend
+	// 1a. Unauthenticated root route redirects to /auth
+	wUnauth := httptest.NewRecorder()
+	reqUnauth, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r.ServeHTTP(wUnauth, reqUnauth)
+
+	if wUnauth.Code != http.StatusFound {
+		t.Fatalf("expected unauthenticated GET / status 302, got %d", wUnauth.Code)
+	}
+
+	// 1b. Authenticated root route serves HTML frontend
+	token, err := auth.CreateJWTToken("tester@gravity.dev")
+	if err != nil {
+		t.Fatalf("failed to create test token: %v", err)
+	}
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{Name: "token", Value: token})
 	r.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
-		t.Fatalf("expected GET / status 200, got %d", w.Code)
+		t.Fatalf("expected authenticated GET / status 200, got %d", w.Code)
 	}
 	if !strings.Contains(w.Header().Get("Content-Type"), "text/html") {
 		t.Errorf("expected text/html content-type, got %q", w.Header().Get("Content-Type"))
@@ -109,11 +124,29 @@ func TestFrontendAndStaticRoutes(t *testing.T) {
 func TestShortenAndRedirectFlow(t *testing.T) {
 	r := setupTestRouter(t)
 
+	token, err := auth.CreateJWTToken("tester@gravity.dev")
+	if err != nil {
+		t.Fatalf("failed to create test token: %v", err)
+	}
+	authCookie := &http.Cookie{Name: "token", Value: token}
+
+	// 0. Unauthenticated shorten returns 401 JSON (not HTML redirect)
+	unauthBody := []byte(`{"original_url":"https://golang.org/doc"}`)
+	wUnauth := httptest.NewRecorder()
+	reqUnauth, _ := http.NewRequest(http.MethodPost, "/api/v1/shorten", bytes.NewReader(unauthBody))
+	reqUnauth.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(wUnauth, reqUnauth)
+
+	if wUnauth.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status 401 Unauthorized without token, got %d: %s", wUnauth.Code, wUnauth.Body.String())
+	}
+
 	// 1. Valid URL shortening
 	body := []byte(`{"original_url":"https://golang.org/doc"}`)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/shorten", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(authCookie)
 	r.ServeHTTP(w, req)
 
 	if w.Code != http.StatusCreated {
@@ -148,6 +181,7 @@ func TestShortenAndRedirectFlow(t *testing.T) {
 	wBad := httptest.NewRecorder()
 	reqBad, _ := http.NewRequest(http.MethodPost, "/api/v1/shorten", bytes.NewReader(badBody))
 	reqBad.Header.Set("Content-Type", "application/json")
+	reqBad.AddCookie(authCookie)
 	r.ServeHTTP(wBad, reqBad)
 
 	if wBad.Code != http.StatusBadRequest {
@@ -169,8 +203,8 @@ func TestAuthenticationFlow(t *testing.T) {
 	reqSignup.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(wSignup, reqSignup)
 
-	if wSignup.Code != http.StatusFound {
-		t.Fatalf("expected 302 Found on signup, got %d: %s", wSignup.Code, wSignup.Body.String())
+	if wSignup.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on signup, got %d: %s", wSignup.Code, wSignup.Body.String())
 	}
 
 	cookies := wSignup.Result().Cookies()
@@ -194,8 +228,8 @@ func TestAuthenticationFlow(t *testing.T) {
 	reqSignin.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(wSignin, reqSignin)
 
-	if wSignin.Code != http.StatusFound {
-		t.Fatalf("expected 302 Found on signin, got %d: %s", wSignin.Code, wSignin.Body.String())
+	if wSignin.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK on signin, got %d: %s", wSignin.Code, wSignin.Body.String())
 	}
 
 	// 3. Signin with non-existent user returns 400 "Failed to get user from database"
