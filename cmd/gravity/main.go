@@ -9,14 +9,14 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(".env"); err != nil {
+		panic(err)
+	}
+
 	if err := database.Init(); err != nil {
 		panic(err)
 	}
 	defer database.DB.Close()
-
-	if err := godotenv.Load(); err != nil {
-		panic(err)
-	}
 
 	r := gin.Default()
 	routes.Setup(r)
