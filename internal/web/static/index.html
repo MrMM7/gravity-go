@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gravity — Minimalist URL compression engine powered by Go, Gin, SQLite, and Argon2id.">
+  <meta name="theme-color" content="#0A0A0A">
+  <title>GRAVITY — URL Compression Engine</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230A0A0A'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23FFFFFF'/%3E%3Cline x1='16' y1='2' x2='16' y2='8' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3Cline x1='16' y1='24' x2='16' y2='30' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3Cline x1='2' y1='16' x2='8' y2='16' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3Cline x1='24' y1='16' x2='30' y2='16' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <a href="#shorten-input" class="skip-link">Skip to URL shortener</a>
+
+  <div class="shell">
+    <!-- Top Architectural Header -->
+    <header class="site-header" role="banner">
+      <div class="brand-cell">
+        <a href="/" class="brand-link" aria-label="Gravity Home">
+          <svg class="brand-mark" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+            <line x1="12" y1="1" x2="12" y2="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="12" y1="18.5" x2="12" y2="23" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="1" y1="12" x2="5.5" y2="12" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="18.5" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span class="brand-name">GRAVITY</span>
+        </a>
+        <span class="version-tag" aria-label="Version 0.6">v0.6</span>
+      </div>
+
+      <div class="header-telemetry" aria-label="System metadata">
+        <span class="telemetry-item">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>ENGINE: ONLINE</span>
+        </span>
+        <span class="telemetry-divider" aria-hidden="true">/</span>
+        <span class="telemetry-item" id="header-auth-status">AUTH: ANONYMOUS</span>
+      </div>
+
+      <nav class="header-nav" aria-label="Primary navigation">
+        <a href="#shorten-section" class="nav-link">01 // COMPRESS</a>
+        <a href="#auth-section" class="nav-link" id="nav-auth-trigger">03 // ACCESS</a>
+      </nav>
+    </header>
+
+    <!-- Main Architectural Grid -->
+    <main class="workspace-grid" id="main-content">
+      <!-- Primary Column: URL Compression & Output -->
+      <div class="primary-column">
+        <!-- 01 // URL Compression Module -->
+        <section class="grid-cell module-shorten" id="shorten-section" aria-labelledby="shorten-heading">
+          <div class="cell-header">
+            <span class="cell-index">01 // URL COMPRESSION ENGINE</span>
+            <span class="cell-meta">POST /api/v1/shorten</span>
+          </div>
+
+          <div class="hero-copy">
+            <h1 id="shorten-heading" class="hero-title">Pull long URLs into a single point.</h1>
+            <p class="hero-subtitle">
+              Deterministic 8-byte cryptographic base64url short codes backed by SQLite. Enter any full HTTP or HTTPS destination below.
+            </p>
+          </div>
+
+          <form id="shorten-form" class="shorten-form" novalidate>
+            <div class="field-header">
+              <label for="shorten-input" class="field-label">DESTINATION URI</label>
+              <div class="field-actions">
+                <button type="button" id="paste-btn" class="micro-btn" title="Paste URL from clipboard">
+                  PASTE CLIPBOARD
+                </button>
+                <button type="button" id="clear-btn" class="micro-btn" hidden>
+                  CLEAR
+                </button>
+              </div>
+            </div>
+
+            <div class="shorten-input-group">
+              <input
+                type="url"
+                id="shorten-input"
+                name="original_url"
+                class="url-input"
+                placeholder="https://example.com/documentation/architecture/distributed-systems"
+                autocomplete="url"
+                autocapitalize="off"
+                spellcheck="false"
+                required
+                aria-describedby="shorten-feedback"
+              >
+              <button type="submit" id="shorten-submit" class="btn-primary shorten-submit">
+                <span class="btn-label" id="shorten-submit-label">SHORTEN</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+
+            <!-- Live Feedback Banner for Shortener -->
+            <div
+              id="shorten-feedback"
+              class="feedback-banner"
+              role="status"
+              aria-live="polite"
+              hidden
+            ></div>
+          </form>
+        </section>
+
+        <!-- 02 // Gravitational Output & Compression Vector -->
+        <section
+          class="grid-cell module-output"
+          id="output-section"
+          aria-labelledby="output-heading"
+          aria-live="polite"
+        >
+          <div class="cell-header">
+            <span class="cell-index" id="output-heading">02 // GRAVITATIONAL TRAJECTORY</span>
+            <span class="cell-meta" id="output-status-badge">STANDBY</span>
+          </div>
+
+          <!-- Empty / Standby State -->
+          <div id="output-empty" class="output-empty">
+            <div class="output-empty-main">
+              <div class="reticle-graphic" aria-hidden="true">
+                <span class="reticle-ring"></span>
+                <span class="reticle-core"></span>
+                <span class="reticle-axis-h"></span>
+                <span class="reticle-axis-v"></span>
+              </div>
+              <div class="output-empty-text">
+                <p class="empty-title">AWAITING INPUT VECTOR</p>
+                <p class="empty-desc">
+                  Submit a destination URL above to generate an 11-character base64url short code and inspect its compression telemetry.
+                </p>
+              </div>
+            </div>
+            <dl class="standby-telemetry" aria-label="Short code generator parameters">
+              <div class="standby-cell">
+                <dt>ENTROPY SOURCE</dt>
+                <dd>64-BIT CSPRNG (crypto/rand)</dd>
+              </div>
+              <div class="standby-cell">
+                <dt>ENCODING</dt>
+                <dd>RFC 4648 RawURLEncoding</dd>
+              </div>
+              <div class="standby-cell">
+                <dt>OUTPUT TOKEN</dt>
+                <dd>11-CHAR FIXED VECTOR</dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Populated Result State -->
+          <div id="output-result" class="output-result" hidden>
+            <div class="result-primary-box">
+              <div class="result-url-block">
+                <span class="result-micro-label">SHORTENED ENDPOINT (GET /:code)</span>
+                <a
+                  id="result-short-link"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="result-short-url"
+                ></a>
+              </div>
+
+              <div class="result-actions">
+                <button type="button" id="copy-btn" class="btn-primary btn-copy">
+                  <span id="copy-btn-text">COPY URL</span>
+                </button>
+                <a
+                  id="test-redirect-link"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-secondary"
+                >
+                  <span>TEST REDIRECT</span>
+                  <span aria-hidden="true">&#8599;</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Signature Detail: Gravitational Compression Vector -->
+            <div class="compression-telemetry" aria-label="URL compression metrics">
+              <div class="compression-header">
+                <span class="compression-label">GRAVITATIONAL COMPRESSION RATIO</span>
+                <span class="compression-delta" id="compression-delta-badge">0%</span>
+              </div>
+
+              <div class="vector-track" role="img" aria-label="Visual length comparison between original URL and shortened URL">
+                <div class="vector-fill" id="vector-fill-bar" style="width: 35%;"></div>
+                <span class="vector-singularity" id="vector-node" style="left: 35%;"></span>
+              </div>
+
+              <dl class="metrics-grid">
+                <div class="metric-cell">
+                  <dt class="metric-key">SHORT CODE</dt>
+                  <dd class="metric-val" id="metric-shortcode">—</dd>
+                </div>
+                <div class="metric-cell">
+                  <dt class="metric-key">ORIGINAL LENGTH</dt>
+                  <dd class="metric-val" id="metric-orig-len">0 CHARS</dd>
+                </div>
+                <div class="metric-cell">
+                  <dt class="metric-key">SHORTENED LENGTH</dt>
+                  <dd class="metric-val" id="metric-short-len">0 CHARS</dd>
+                </div>
+                <div class="metric-cell metric-cell-wide">
+                  <dt class="metric-key">DESTINATION TARGET</dt>
+                  <dd class="metric-val metric-val-truncate" id="metric-orig-url">—</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Session-only Ephemeral Log (Honest In-Memory Buffer) -->
+          <div id="session-log-container" class="session-log" hidden>
+            <div class="session-log-header">
+              <span class="session-log-title">CURRENT TAB BUFFER (EPHEMERAL)</span>
+              <span class="session-log-note">IN-MEMORY ONLY &middot; NOT PERSISTED BY API</span>
+            </div>
+            <ul id="session-log-list" class="session-log-list" aria-label="URLs shortened during this tab session"></ul>
+          </div>
+        </section>
+      </div>
+
+      <!-- Secondary Column: Authentication & System Specification -->
+      <aside class="secondary-column" aria-label="Authentication and system specification">
+        <!-- 03 // Access Control Module -->
+        <section class="grid-cell module-auth" id="auth-section" aria-labelledby="auth-heading">
+          <div class="cell-header">
+            <span class="cell-index" id="auth-heading">03 // ACCESS CONTROL</span>
+            <span class="cell-meta" id="auth-endpoint-meta">POST /api/v1/signin</span>
+          </div>
+
+          <div class="auth-intro">
+            <p class="auth-description">
+              Authenticate with Argon2id password verification to receive an HTTP-only signed JWT session cookie.
+            </p>
+          </div>
+
+          <!-- Accessible Tab Switcher -->
+          <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+            <button
+              type="button"
+              role="tab"
+              id="tab-signin"
+              class="auth-tab is-active"
+              aria-selected="true"
+              aria-controls="auth-form-panel"
+              data-mode="signin"
+            >
+              SIGN IN
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-signup"
+              class="auth-tab"
+              aria-selected="false"
+              aria-controls="auth-form-panel"
+              data-mode="signup"
+            >
+              SIGN UP
+            </button>
+          </div>
+
+          <!-- Active Session Card (Displayed after successful Sign In / Sign Up in current session) -->
+          <div id="auth-active-panel" class="auth-active-panel" hidden>
+            <div class="session-badge-row">
+              <span class="session-pill">SESSION COOKIE ISSUED</span>
+              <span class="session-code">HTTP-ONLY</span>
+            </div>
+            <p class="session-summary">
+              Authenticated as <strong id="session-user-email"></strong>. The server issued a signed <code>token</code> cookie via <code>Set-Cookie</code>.
+            </p>
+            <dl class="session-spec-list">
+              <div class="session-spec-row">
+                <dt>COOKIE NAME</dt>
+                <dd><code>token</code></dd>
+              </div>
+              <div class="session-spec-row">
+                <dt>PROTECTION</dt>
+                <dd><code>HttpOnly; Path=/</code></dd>
+              </div>
+              <div class="session-spec-row">
+                <dt>MAX-AGE TTL</dt>
+                <dd><code>3600s (60 min)</code></dd>
+              </div>
+              <div class="session-spec-row">
+                <dt>HASHING</dt>
+                <dd><code>Argon2id (64MB, t=3)</code></dd>
+              </div>
+            </dl>
+            <p class="session-honesty-note">
+              Note: Because the JWT cookie is <code>HttpOnly</code> and the backend is stateless, JavaScript never touches your raw token.
+            </p>
+            <button type="button" id="auth-switch-btn" class="btn-secondary btn-full">
+              AUTHENTICATE ANOTHER ACCOUNT
+            </button>
+          </div>
+
+          <!-- Authentication Form Panel -->
+          <div id="auth-form-panel" role="tabpanel" aria-labelledby="tab-signin">
+            <form id="auth-form" class="auth-form" novalidate>
+              <div class="form-group">
+                <label for="auth-email" class="field-label">EMAIL ADDRESS</label>
+                <input
+                  type="email"
+                  id="auth-email"
+                  name="email"
+                  class="text-input"
+                  placeholder="operator@domain.com"
+                  autocomplete="email"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  required
+                >
+              </div>
+
+              <div class="form-group">
+                <div class="field-header">
+                  <label for="auth-password" class="field-label">PASSWORD</label>
+                  <button
+                    type="button"
+                    id="toggle-password-btn"
+                    class="micro-btn"
+                    aria-pressed="false"
+                    aria-controls="auth-password"
+                  >
+                    SHOW
+                  </button>
+                </div>
+                <input
+                  type="password"
+                  id="auth-password"
+                  name="password"
+                  class="text-input"
+                  placeholder="Enter password"
+                  autocomplete="current-password"
+                  required
+                >
+              </div>
+
+              <button type="submit" id="auth-submit" class="btn-primary btn-full">
+                <span id="auth-submit-label">SIGN IN TO GRAVITY</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+
+              <div
+                id="auth-feedback"
+                class="feedback-banner"
+                role="status"
+                aria-live="polite"
+                hidden
+              ></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- 04 // System Contract & Architecture Reference -->
+        <section class="grid-cell module-spec" aria-labelledby="spec-heading">
+          <div class="cell-header">
+            <span class="cell-index" id="spec-heading">04 // PROTOCOL SPECIFICATION</span>
+            <span class="cell-meta">SAME-ORIGIN</span>
+          </div>
+
+          <dl class="spec-table">
+            <div class="spec-row">
+              <dt class="spec-route">POST /api/v1/shorten</dt>
+              <dd class="spec-desc">Validates URL &amp; persists 8-byte cryptographic short code.</dd>
+            </div>
+            <div class="spec-row">
+              <dt class="spec-route">GET /:code</dt>
+              <dd class="spec-desc">Resolves short code in SQLite and issues HTTP 302 redirect.</dd>
+            </div>
+            <div class="spec-row">
+              <dt class="spec-route">POST /api/v1/signup</dt>
+              <dd class="spec-desc">Salts &amp; hashes password via Argon2id; sets HttpOnly JWT cookie.</dd>
+            </div>
+            <div class="spec-row">
+              <dt class="spec-route">POST /api/v1/signin</dt>
+              <dd class="spec-desc">Constant-time Argon2id verification; sets HttpOnly JWT cookie.</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+    </main>
+
+    <!-- Architectural Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-cell">
+        <span>GRAVITY URL SHORTENER</span>
+        <span class="footer-sep" aria-hidden="true">//</span>
+        <span>GO + GIN + SQLITE + ARGON2ID</span>
+      </div>
+      <div class="footer-cell footer-right">
+        <span>MONOCHROME PRECISION INTERFACE</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js" defer></script>
+</body>
+</html>

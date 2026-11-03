@@ -23,7 +23,7 @@ func GetUserFromDatabase(email string) (models.SignInRequest, error) {
 	stmt, err := DB.Prepare(query)
 
 	if err != nil {
-		return models.SignInRequest{}, nil
+		return models.SignInRequest{}, err
 	}
 	defer stmt.Close()
 
@@ -31,7 +31,7 @@ func GetUserFromDatabase(email string) (models.SignInRequest, error) {
 	var signInRequest models.SignInRequest
 	err = row.Scan(&signInRequest.Email, &signInRequest.Password)
 	if err != nil {
-		return models.SignInRequest{}, nil
+		return models.SignInRequest{}, err
 	}
 	return signInRequest, nil
 }

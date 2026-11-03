@@ -13,11 +13,13 @@ func ShortenHandler(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Shorten URL binding failed"})
+		return
 	}
 
 	url, err := core.CreateShortenedURL(req.OriginalURL)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create shortened url"})
+		return
 	}
 	c.JSON(http.StatusCreated, models.ShortenedURL{
 		OriginalURL: url.OriginalURL,
