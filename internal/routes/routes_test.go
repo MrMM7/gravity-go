@@ -65,8 +65,8 @@ func TestFrontendAndStaticRoutes(t *testing.T) {
 	if !strings.Contains(w.Header().Get("Content-Type"), "text/html") {
 		t.Errorf("expected text/html content-type, got %q", w.Header().Get("Content-Type"))
 	}
-	if !strings.Contains(w.Body.String(), "GRAVITY") {
-		t.Errorf("expected index.html body to contain GRAVITY")
+	if !strings.Contains(w.Body.String(), "Gravity") {
+		t.Errorf("expected index.html body to contain Gravity")
 	}
 
 	// 2. CSS asset loads
