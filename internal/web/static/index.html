@@ -16,11 +16,13 @@
         <span class="brand-dot" aria-hidden="true"></span>
         <span class="brand-name">Gravity</span>
       </a>
-      <a href="#auth-section" class="header-link" id="header-auth-link">Sign in</a>
+      <nav class="header-nav" aria-label="Account navigation">
+        <a href="/auth" class="header-link" id="header-signin-link">Sign in</a>
+        <a href="/auth?mode=signup" class="btn btn-secondary btn-sm" id="header-signup-link">Sign up</a>
+      </nav>
     </header>
 
     <main class="main">
-      <!-- URL Shortener -->
       <section class="section" aria-labelledby="shorten-title">
         <h1 id="shorten-title" class="title">Shorten a link</h1>
         <p class="subtitle">Paste a long URL to create a short, shareable link.</p>
@@ -47,7 +49,6 @@
           <p id="shorten-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
         </form>
 
-        <!-- Result -->
         <div id="output-result" class="result-card" aria-live="polite" hidden>
           <div class="result-main">
             <a
@@ -73,96 +74,6 @@
               Visit
             </a>
           </div>
-        </div>
-      </section>
-
-      <hr class="divider">
-
-      <!-- Authentication -->
-      <section class="section" id="auth-section" aria-labelledby="auth-title">
-        <div class="auth-header">
-          <h2 id="auth-title" class="section-title">Account</h2>
-          <div class="tabs" role="tablist" aria-label="Account access">
-            <button
-              type="button"
-              role="tab"
-              id="tab-signin"
-              class="tab is-active"
-              aria-selected="true"
-              aria-controls="auth-form-panel"
-            >
-              Sign in
-            </button>
-            <button
-              type="button"
-              role="tab"
-              id="tab-signup"
-              class="tab"
-              aria-selected="false"
-              aria-controls="auth-form-panel"
-            >
-              Sign up
-            </button>
-          </div>
-        </div>
-
-        <!-- Signed-in state -->
-        <div id="auth-active-panel" class="signed-in-box" hidden>
-          <p class="signed-in-text">
-            Signed in as <strong id="session-user-email"></strong>
-          </p>
-          <button type="button" id="auth-switch-btn" class="btn btn-secondary btn-sm">
-            Switch account
-          </button>
-        </div>
-
-        <!-- Sign in / Sign up form -->
-        <div id="auth-form-panel" role="tabpanel" aria-labelledby="tab-signin">
-          <form id="auth-form" class="auth-form" novalidate>
-            <div class="field">
-              <label for="auth-email" class="label">Email</label>
-              <input
-                type="email"
-                id="auth-email"
-                name="email"
-                class="input"
-                placeholder="you@example.com"
-                autocomplete="email"
-                autocapitalize="off"
-                spellcheck="false"
-                required
-              >
-            </div>
-
-            <div class="field">
-              <div class="label-row">
-                <label for="auth-password" class="label">Password</label>
-                <button
-                  type="button"
-                  id="toggle-password-btn"
-                  class="text-btn"
-                  aria-pressed="false"
-                >
-                  Show
-                </button>
-              </div>
-              <input
-                type="password"
-                id="auth-password"
-                name="password"
-                class="input"
-                placeholder="••••••••"
-                autocomplete="current-password"
-                required
-              >
-            </div>
-
-            <button type="submit" id="auth-submit" class="btn btn-primary btn-block">
-              Sign in
-            </button>
-
-            <p id="auth-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
-          </form>
         </div>
       </section>
     </main>

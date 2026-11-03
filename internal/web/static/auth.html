@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in or create a Gravity account.">
+  <meta name="theme-color" content="#0A0A0A">
+  <title>Account — Gravity</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230A0A0A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23FFFFFF'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <a href="/" class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-name">Gravity</span>
+      </a>
+      <a href="/" class="header-link">&larr; Back to shortener</a>
+    </header>
+
+    <main class="main">
+      <section class="section auth-page-section" aria-labelledby="auth-title">
+        <div class="auth-header">
+          <div>
+            <h1 id="auth-title" class="title">Sign in</h1>
+            <p id="auth-subtitle" class="subtitle">Enter your email and password to continue.</p>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Account mode">
+            <button
+              type="button"
+              role="tab"
+              id="tab-signin"
+              class="tab is-active"
+              aria-selected="true"
+              aria-controls="auth-form-panel"
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-signup"
+              class="tab"
+              aria-selected="false"
+              aria-controls="auth-form-panel"
+            >
+              Sign up
+            </button>
+          </div>
+        </div>
+
+        <div id="auth-form-panel" role="tabpanel" aria-labelledby="tab-signin">
+          <form id="auth-form" class="auth-form" novalidate>
+            <div class="field">
+              <label for="auth-email" class="label">Email</label>
+              <input
+                type="email"
+                id="auth-email"
+                name="email"
+                class="input"
+                placeholder="you@example.com"
+                autocomplete="email"
+                autocapitalize="off"
+                spellcheck="false"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <div class="label-row">
+                <label for="auth-password" class="label">Password</label>
+                <button
+                  type="button"
+                  id="toggle-password-btn"
+                  class="text-btn"
+                  aria-pressed="false"
+                >
+                  Show
+                </button>
+              </div>
+              <input
+                type="password"
+                id="auth-password"
+                name="password"
+                class="input"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              >
+            </div>
+
+            <button type="submit" id="auth-submit" class="btn btn-primary btn-block">
+              Sign in
+            </button>
+
+            <p id="auth-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Gravity</span>
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js" defer></script>
+</body>
+</html>

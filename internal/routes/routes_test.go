@@ -65,8 +65,20 @@ func TestFrontendAndStaticRoutes(t *testing.T) {
 	if !strings.Contains(w.Header().Get("Content-Type"), "text/html") {
 		t.Errorf("expected text/html content-type, got %q", w.Header().Get("Content-Type"))
 	}
-	if !strings.Contains(w.Body.String(), "Gravity") {
-		t.Errorf("expected index.html body to contain Gravity")
+	if !strings.Contains(w.Body.String(), "Shorten a link") {
+		t.Errorf("expected index.html body to contain 'Shorten a link'")
+	}
+
+	// 2. Auth route serves separate authentication page
+	wAuth := httptest.NewRecorder()
+	reqAuth, _ := http.NewRequest(http.MethodGet, "/auth", nil)
+	r.ServeHTTP(wAuth, reqAuth)
+
+	if wAuth.Code != http.StatusOK {
+		t.Fatalf("expected GET /auth status 200, got %d", wAuth.Code)
+	}
+	if !strings.Contains(wAuth.Body.String(), "auth-form") {
+		t.Errorf("expected auth.html body to contain auth-form")
 	}
 
 	// 2. CSS asset loads

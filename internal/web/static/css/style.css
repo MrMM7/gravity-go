@@ -110,6 +110,12 @@ body {
   display: inline-block;
 }
 
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
 .header-link {
   font-size: 0.875rem;
   color: var(--text-muted);
@@ -127,7 +133,7 @@ body {
   padding: var(--space-7) 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
+  justify-content: center;
 }
 
 .section {
@@ -320,9 +326,14 @@ body {
 
 .auth-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: var(--space-5);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.auth-header .subtitle {
+  margin-bottom: 0;
 }
 
 .tabs {

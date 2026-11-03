@@ -10,19 +10,20 @@
   };
 
   const dom = {
-    headerAuthLink: document.getElementById("header-auth-link"),
-
+    // Shortener page elements
     shortenForm: document.getElementById("shorten-form"),
     shortenInput: document.getElementById("shorten-input"),
     shortenSubmit: document.getElementById("shorten-submit"),
     shortenFeedback: document.getElementById("shorten-feedback"),
-
     outputResult: document.getElementById("output-result"),
     resultShortLink: document.getElementById("result-short-link"),
     resultOrigUrl: document.getElementById("result-orig-url"),
     copyBtn: document.getElementById("copy-btn"),
     testRedirectLink: document.getElementById("test-redirect-link"),
 
+    // Auth page elements
+    authTitle: document.getElementById("auth-title"),
+    authSubtitle: document.getElementById("auth-subtitle"),
     tabSignin: document.getElementById("tab-signin"),
     tabSignup: document.getElementById("tab-signup"),
     authFormPanel: document.getElementById("auth-form-panel"),
@@ -31,10 +32,7 @@
     authPassword: document.getElementById("auth-password"),
     togglePasswordBtn: document.getElementById("toggle-password-btn"),
     authSubmit: document.getElementById("auth-submit"),
-    authFeedback: document.getElementById("auth-feedback"),
-    authActivePanel: document.getElementById("auth-active-panel"),
-    sessionUserEmail: document.getElementById("session-user-email"),
-    authSwitchBtn: document.getElementById("auth-switch-btn")
+    authFeedback: document.getElementById("auth-feedback")
   };
 
   function validateUrl(raw) {
@@ -194,6 +192,15 @@
     state.authMode = mode;
     const isSignin = mode === "signin";
 
+    if (dom.authTitle) {
+      dom.authTitle.textContent = isSignin ? "Sign in" : "Create account";
+    }
+    if (dom.authSubtitle) {
+      dom.authSubtitle.textContent = isSignin
+        ? "Enter your email and password to continue."
+        : "Register with your email and a password.";
+    }
+
     dom.tabSignin.classList.toggle("is-active", isSignin);
     dom.tabSignin.setAttribute("aria-selected", isSignin ? "true" : "false");
 
@@ -204,8 +211,6 @@
     dom.authSubmit.textContent = isSignin ? "Sign in" : "Create account";
     dom.authPassword.setAttribute("autocomplete", isSignin ? "current-password" : "new-password");
 
-    dom.authActivePanel.hidden = true;
-    dom.authFormPanel.hidden = false;
     hideFeedback(dom.authFeedback);
   }
 
@@ -250,11 +255,8 @@
         return;
       }
 
-      dom.authPassword.value = "";
-      dom.sessionUserEmail.textContent = check.email;
-      dom.headerAuthLink.textContent = check.email;
-      dom.authFormPanel.hidden = true;
-      dom.authActivePanel.hidden = false;
+      // Redirect to the core URL shortener page upon successful authentication
+      window.location.href = "/";
     } catch (_) {
       showFeedback(dom.authFeedback, true, "Unable to reach the server.");
     } finally {
@@ -267,7 +269,9 @@
     }
   }
 
-  function init() {
+  function initShortenerPage() {
+    if (!dom.shortenForm) return;
+
     dom.shortenForm.addEventListener("submit", handleShorten);
 
     dom.shortenInput.addEventListener("input", function () {
@@ -287,6 +291,15 @@
         }, 2000);
       }
     });
+  }
+
+  function initAuthPage() {
+    if (!dom.authForm) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "signup" || window.location.pathname === "/signup") {
+      switchAuthMode("signup");
+    }
 
     dom.tabSignin.addEventListener("click", function () {
       switchAuthMode("signin");
@@ -304,13 +317,11 @@
     });
 
     dom.authForm.addEventListener("submit", handleAuth);
+  }
 
-    dom.authSwitchBtn.addEventListener("click", function () {
-      dom.authActivePanel.hidden = true;
-      dom.authFormPanel.hidden = false;
-      dom.headerAuthLink.textContent = "Sign in";
-      dom.authEmail.focus();
-    });
+  function init() {
+    initShortenerPage();
+    initAuthPage();
   }
 
   if (document.readyState === "loading") {
